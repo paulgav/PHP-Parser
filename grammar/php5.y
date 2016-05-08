@@ -428,8 +428,8 @@ class_statement_list:
 class_statement:
       variable_modifiers property_declaration_list ';'      { $$ = Stmt\Property[$1, $2]; }
     | T_CONST class_const_list ';'                          { $$ = Stmt\ClassConst[$2]; }
-    | method_modifiers T_FUNCTION optional_ref identifier '(' parameter_list ')' optional_return_type method_body
-          { $$ = Stmt\ClassMethod[$4, ['type' => $1, 'byRef' => $3, 'params' => $6, 'returnType' => $8, 'stmts' => $9]]; }
+    | method_modifiers T_FUNCTION optional_ref identifier parameter_list_open_tag parameter_list parameter_list_close_tag optional_return_type method_body
+          { $$ = Stmt\ClassMethod[$4, ['type' => $1, 'byRef' => $3, 'params' => new NodesList($6, $5, $7), 'returnType' => $8, 'stmts' => $9]]; }
     | T_USE name_list trait_adaptations                     { $$ = Stmt\TraitUse[$2, $3]; }
 ;
 
@@ -973,5 +973,38 @@ encaps_var_offset:
     | T_NUM_STRING                                          { $$ = Scalar\String_[$1]; }
     | T_VARIABLE                                            { $$ = Expr\Variable[parseVar($1)]; }
 ;
+parameter_list_open_tag:
+	  opened_round_bracket                                  { $$ = Tag\ListOpen[$1]; }
+;
+parameter_list_close_tag:
+	  closed_round_bracket                                  { $$ = Tag\ListClose[$1]; }
+;
+
+stmts_list_open_tag:
+	  opened_curly_bracket                                 { $$ = Tag\ListOpen[$1]; }
+;
+
+stmts_list_close_tag:
+	  closed_curly_bracket                                 { $$ = Tag\ListClose[$1]; }
+;
+
+opened_round_bracket:
+    '('
+;
+closed_round_bracket:
+    ')'
+;
+opened_rect_bracket:
+    '['
+;
+closed_rect_bracket:
+    '['
+;
+opened_curly_bracket:
+    '{'
+;
+closed_curly_bracket:
+    '}'
+;   
 
 %%
