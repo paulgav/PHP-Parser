@@ -150,11 +150,11 @@ inner_statement:
 ;
 
 non_empty_statement:
-      '{' inner_statement_list '}'                          { $$ = $2; }
+      _CBO inner_statement_list _CBC                        { $$ = new NodesList\Stmts($2, $1, $3); }
     | T_IF parentheses_expr statement elseif_list else_single
-          { $$ = Stmt\If_[$2, ['stmts' => toArray($3), 'elseifs' => $4, 'else' => $5]]; }
+          { $$ = Stmt\If_[$2, ['stmts' => new NodesList\Stmts(toArray($3)), 'elseifs' => new NodesList\ElseIfs($4), 'else' => $5]]; }
     | T_IF parentheses_expr ':' inner_statement_list new_elseif_list new_else_single T_ENDIF ';'
-          { $$ = Stmt\If_[$2, ['stmts' => $4, 'elseifs' => $5, 'else' => $6]]; }
+          { $$ = Stmt\If_[$2, ['stmts' => $4, 'elseifs' => new NodesList\ElseIfs($5), 'else' => $6]]; }
     | T_WHILE parentheses_expr while_statement              { $$ = Stmt\While_[$2, $3]; }
     | T_DO statement T_WHILE parentheses_expr ';'           { $$ = Stmt\Do_   [$4, toArray($2)]; }
     | T_FOR '(' for_expr ';'  for_expr ';' for_expr ')' for_statement
@@ -321,7 +321,7 @@ elseif_list:
 ;
 
 elseif:
-      T_ELSEIF parentheses_expr statement                   { $$ = Stmt\ElseIf_[$2, toArray($3)]; }
+      T_ELSEIF parentheses_expr statement                   { $$ = Stmt\ElseIf_[$2, $3]; }
 ;
 
 new_elseif_list:
@@ -335,7 +335,7 @@ new_elseif:
 
 else_single:
       /* empty */                                           { $$ = null; }
-    | T_ELSE statement                                      { $$ = Stmt\Else_[toArray($2)]; }
+    | T_ELSE statement                                      { $$ = Stmt\Else_[$2]; }
 ;
 
 new_else_single:
@@ -428,8 +428,8 @@ class_statement_list:
 class_statement:
       variable_modifiers property_declaration_list ';'      { $$ = Stmt\Property[$1, $2]; }
     | T_CONST class_const_list ';'                          { $$ = Stmt\ClassConst[$2]; }
-    | method_modifiers T_FUNCTION optional_ref identifier parameter_list_open_tag parameter_list parameter_list_close_tag optional_return_type method_body
-          { $$ = Stmt\ClassMethod[$4, ['type' => $1, 'byRef' => $3, 'params' => new NodesList($6, $5, $7), 'returnType' => $8, 'stmts' => $9]]; }
+    | method_modifiers T_FUNCTION optional_ref identifier _RBO parameter_list _RBC optional_return_type method_body
+          { $$ = Stmt\ClassMethod[$4, ['type' => $1, 'byRef' => $3, 'params' => new NodesList\Params($6, $5, $7), 'returnType' => $8, 'stmts' => $9]]; }
     | T_USE name_list trait_adaptations                     { $$ = Stmt\TraitUse[$2, $3]; }
 ;
 
@@ -466,7 +466,7 @@ trait_method_reference:
 
 method_body:
       ';' /* abstract method */                             { $$ = null; }
-    | '{' inner_statement_list '}'                          { $$ = $2; }
+    | _CBO inner_statement_list _CBC                          { $$ = new NodesList\Stmts($2, $1, $3); }
 ;
 
 variable_modifiers:
@@ -617,12 +617,12 @@ yield_expr:
 ;
 
 array_expr:
-      T_ARRAY '(' array_pair_list ')'
+      T_ARRAY _RBO array_pair_list _RBC
           { $attrs = attributes(); $attrs['kind'] = Expr\Array_::KIND_LONG;
-            $$ = new Expr\Array_($3, $attrs); }
-    | '[' array_pair_list ']'
+            $$ = new Expr\Array_(new NodesList\ArrayItems($3, $2, $4), $attrs); }
+    | _TBO array_pair_list _TBC
           { $attrs = attributes(); $attrs['kind'] = Expr\Array_::KIND_SHORT;
-            $$ = new Expr\Array_($2, $attrs); }
+            $$ = new Expr\Array_(new NodesList\ArrayItems($2, $1, $3), $attrs); }
 ;
 
 scalar_dereference:
@@ -973,19 +973,27 @@ encaps_var_offset:
     | T_NUM_STRING                                          { $$ = Scalar\String_[$1]; }
     | T_VARIABLE                                            { $$ = Expr\Variable[parseVar($1)]; }
 ;
-parameter_list_open_tag:
+_RBO:
 	  opened_round_bracket                                  { $$ = Tag\ListOpen[$1]; }
 ;
-parameter_list_close_tag:
+_RBC:
 	  closed_round_bracket                                  { $$ = Tag\ListClose[$1]; }
 ;
 
-stmts_list_open_tag:
-	  opened_curly_bracket                                 { $$ = Tag\ListOpen[$1]; }
+_CBO:
+	  opened_curly_bracket                                  { $$ = Tag\ListOpen[$1]; }
 ;
 
-stmts_list_close_tag:
-	  closed_curly_bracket                                 { $$ = Tag\ListClose[$1]; }
+_CBC:
+	  closed_curly_bracket                                  { $$ = Tag\ListClose[$1]; }
+;
+
+_TBO:
+	  opened_rect_bracket                                   { $$ = Tag\ListOpen[$1]; }
+;
+
+_TBC:
+	  closed_rect_bracket                                   { $$ = Tag\ListClose[$1]; }
 ;
 
 opened_round_bracket:
@@ -998,7 +1006,7 @@ opened_rect_bracket:
     '['
 ;
 closed_rect_bracket:
-    '['
+    ']'
 ;
 opened_curly_bracket:
     '{'

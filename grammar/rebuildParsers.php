@@ -147,6 +147,11 @@ function resolveMacros($code) {
                 return 'is_array(' . $args[0] . ') ? ' . $args[0] . ' : array(' . $args[0] . ')';
             }
 
+            if ('toNodesList' == $name) {
+                assertArgs(2, $args, $name);
+
+                return 'instance of $args[0] ? ' . $args[1] . ' : new ' . $args[0] .  '(' . $args[1] . ')';
+            }
             if ('parseVar' == $name) {
                 assertArgs(1, $args, $name);
 
