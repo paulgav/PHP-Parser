@@ -321,7 +321,7 @@ elseif_list:
 ;
 
 elseif:
-      T_ELSEIF parentheses_expr statement                   { $$ = Stmt\ElseIf_[$2, $3]; }
+      T_ELSEIF parentheses_expr statement                   { $$ = Stmt\ElseIf_[$2, toNodesList($3, NodesList\Stmts)]; }
 ;
 
 new_elseif_list:
@@ -335,7 +335,7 @@ new_elseif:
 
 else_single:
       /* empty */                                           { $$ = null; }
-    | T_ELSE statement                                      { $$ = Stmt\Else_[$2]; }
+    | T_ELSE statement                                      { $$ = Stmt\Else_[toNodesList($2, NodesList\Stmts)]; }
 ;
 
 new_else_single:

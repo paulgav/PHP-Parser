@@ -49,7 +49,7 @@ abstract class Main extends \XLite\Module\AModule
             $a = 1;
         } elseif (true) {
             
-        } else
+        } else 
             return;
     }
 

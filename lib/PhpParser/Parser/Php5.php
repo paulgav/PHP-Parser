@@ -1748,7 +1748,7 @@ class Php5 extends \PhpParser\ParserAbstract
     }
 
     protected function reduceRule207() {
-         $this->semValue = new Stmt\ElseIf_($this->semStack[$this->stackPos-(3-2)], $this->semStack[$this->stackPos-(3-3)], $this->startAttributeStack[$this->stackPos-(3-1)] + $this->endAttributes);
+         $this->semValue = new Stmt\ElseIf_($this->semStack[$this->stackPos-(3-2)], $this->semStack[$this->stackPos-(3-3)] instanceof NodesList\Stmts ? $this->semStack[$this->stackPos-(3-3)] : new NodesList\Stmts(is_array($this->semStack[$this->stackPos-(3-3)]) ? $this->semStack[$this->stackPos-(3-3)] : array($this->semStack[$this->stackPos-(3-3)])), $this->startAttributeStack[$this->stackPos-(3-1)] + $this->endAttributes);
     }
 
     protected function reduceRule208() {
@@ -1768,7 +1768,7 @@ class Php5 extends \PhpParser\ParserAbstract
     }
 
     protected function reduceRule212() {
-         $this->semValue = new Stmt\Else_($this->semStack[$this->stackPos-(2-2)], $this->startAttributeStack[$this->stackPos-(2-1)] + $this->endAttributes);
+         $this->semValue = new Stmt\Else_($this->semStack[$this->stackPos-(2-2)] instanceof NodesList\Stmts ? $this->semStack[$this->stackPos-(2-2)] : new NodesList\Stmts(is_array($this->semStack[$this->stackPos-(2-2)]) ? $this->semStack[$this->stackPos-(2-2)] : array($this->semStack[$this->stackPos-(2-2)])), $this->startAttributeStack[$this->stackPos-(2-1)] + $this->endAttributes);
     }
 
     protected function reduceRule213() {
