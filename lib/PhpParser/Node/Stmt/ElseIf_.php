@@ -3,6 +3,7 @@
 namespace PhpParser\Node\Stmt;
 
 use PhpParser\Node;
+use PhpParser\NodesList;
 
 class ElseIf_ extends Node\Stmt
 {
@@ -18,7 +19,7 @@ class ElseIf_ extends Node\Stmt
      * @param Node[]    $stmts      Statements
      * @param array     $attributes Additional attributes
      */
-    public function __construct(Node\Expr $cond, array $stmts = array(), array $attributes = array()) {
+    public function __construct(Node\Expr $cond, NodesList\Stmts $stmts = null, array $attributes = array()) {
         parent::__construct($attributes);
         $this->cond = $cond;
         $this->stmts = $stmts;

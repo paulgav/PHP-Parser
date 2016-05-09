@@ -3,6 +3,7 @@
 namespace PhpParser\Node\Stmt;
 
 use PhpParser\Node;
+use PhpParser\NodesList;
 
 class Else_ extends Node\Stmt
 {
@@ -15,8 +16,9 @@ class Else_ extends Node\Stmt
      * @param Node[] $stmts      Statements
      * @param array  $attributes Additional attributes
      */
-    public function __construct(array $stmts = array(), array $attributes = array()) {
+    public function __construct(NodesList\Stmts $stmts = null, array $attributes = array()) {
         parent::__construct($attributes);
+
         $this->stmts = $stmts;
     }
 

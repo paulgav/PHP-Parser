@@ -2,3 +2,7 @@ vendor/
 composer.lock
 grammar/kmyacc.exe
 grammar/y.output
+kmyacc-forked-master/
+test.php
+test_php_file.php
+
