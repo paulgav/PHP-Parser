@@ -4,9 +4,8 @@ namespace PhpParser;
 
 use PhpParser\Tag;
 
-class NodesListAbstract
+abstract class NodesListAbstract extends ArrayCollection
 {
-    protected $nodes;
 
     /**
      * Creates a List of Nodes.
@@ -16,8 +15,9 @@ class NodesListAbstract
      * @param array $closeTag Close tag
      */
     public function __construct(array $nodes = array(), Tag\ListOpen $openTag = null, Tag\ListClose $closeTag = null) {
-        $this->nodes = $nodes;
         $this->openTag = $openTag;
         $this->closeTag = $closeTag;
+
+        parent::__construct($nodes);
     }
 }

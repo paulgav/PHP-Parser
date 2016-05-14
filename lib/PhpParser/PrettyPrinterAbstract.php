@@ -99,11 +99,11 @@ abstract class PrettyPrinterAbstract
     /**
      * Pretty prints an array of statements.
      *
-     * @param Node[] $stmts Array of statements
+     * @param Node[] $stmts NodesList
      *
      * @return string Pretty printed statements
      */
-    public function prettyPrint(array $stmts) {
+    public function prettyPrint($stmts) {
         $this->preprocessNodes($stmts);
 
         return ltrim($this->handleMagicTokens($this->pStmts($stmts, false)));
@@ -123,11 +123,11 @@ abstract class PrettyPrinterAbstract
     /**
      * Pretty prints a file of statements (includes the opening <?php tag if it is required).
      *
-     * @param Node[] $stmts Array of statements
+     * @param Node[] $stmts NodesList
      *
      * @return string Pretty printed statements
      */
-    public function prettyPrintFile(array $stmts) {
+    public function prettyPrintFile($stmts) {
         if (!$stmts) {
             return "<?php\n\n";
         }
@@ -147,9 +147,9 @@ abstract class PrettyPrinterAbstract
     /**
      * Preprocesses the top-level nodes to initialize pretty printer state.
      *
-     * @param Node[] $nodes Array of nodes
+     * @param Node[] $nodes NodesList
      */
-    protected function preprocessNodes(array $nodes) {
+    protected function preprocessNodes($nodes) {
         /* We can use semicolon-namespaces unless there is a global namespace declaration */
         $this->canUseSemicolonNamespaces = true;
         foreach ($nodes as $node) {
@@ -173,13 +173,14 @@ abstract class PrettyPrinterAbstract
     /**
      * Pretty prints an array of nodes (statements) and indents them optionally.
      *
-     * @param Node[] $nodes  Array of nodes
+     * @param Node[] $nodes  NodesList
      * @param bool   $indent Whether to indent the printed nodes
      *
      * @return string Pretty printed statements
      */
-    protected function pStmts(array $nodes, $indent = true) {
+    protected function pStmts($nodes, $indent = true) {
         $result = '';
+
         foreach ($nodes as $node) {
             $result .= "\n"
                     . $this->pComments($node->getAttribute('comments', array()))
@@ -252,12 +253,12 @@ abstract class PrettyPrinterAbstract
     /**
      * Pretty prints an array of nodes and implodes the printed values.
      *
-     * @param Node[] $nodes Array of Nodes to be printed
+     * @param Node[] $nodes NodesList to be printed
      * @param string $glue  Character to implode with
      *
      * @return string Imploded pretty printed nodes
      */
-    protected function pImplode(array $nodes, $glue = '') {
+    protected function pImplode($nodes, $glue = '') {
         $pNodes = array();
         foreach ($nodes as $node) {
             $pNodes[] = $this->p($node);
@@ -269,11 +270,11 @@ abstract class PrettyPrinterAbstract
     /**
      * Pretty prints an array of nodes and implodes the printed values with commas.
      *
-     * @param Node[] $nodes Array of Nodes to be printed
+     * @param Node[] $nodes NodesList to be printed
      *
      * @return string Comma separated pretty printed nodes
      */
-    protected function pCommaSeparated(array $nodes) {
+    protected function pCommaSeparated($nodes) {
         return $this->pImplode($nodes, ', ');
     }
 

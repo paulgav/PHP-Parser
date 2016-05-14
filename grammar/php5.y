@@ -56,8 +56,8 @@ top_statement:
     | T_HALT_COMPILER
           { $$ = Stmt\HaltCompiler[$this->lexer->handleHaltCompiler()]; }
     | T_NAMESPACE namespace_name ';'                        { $$ = Stmt\Namespace_[$2, null]; }
-    | T_NAMESPACE namespace_name '{' top_statement_list '}' { $$ = Stmt\Namespace_[$2, $4]; }
-    | T_NAMESPACE '{' top_statement_list '}'                { $$ = Stmt\Namespace_[null,     $3]; }
+    | T_NAMESPACE namespace_name CBO top_statement_list CBC { $$ = Stmt\Namespace_[$2, new NodesList\Stmts($4, $3, $5)]; }
+    | T_NAMESPACE CBO top_statement_list CBC                { $$ = Stmt\Namespace_[null,     new NodesList\Stmts($3, $2, $4)]; }
     | T_USE use_declarations ';'                            { $$ = Stmt\Use_[$2, Stmt\Use_::TYPE_NORMAL]; }
     | T_USE use_type use_declarations ';'                   { $$ = Stmt\Use_[$3, $2]; }
     | group_use_declaration ';'                             { $$ = $1; }
@@ -150,7 +150,7 @@ inner_statement:
 ;
 
 non_empty_statement:
-      _CBO inner_statement_list _CBC                        { $$ = new NodesList\Stmts($2, $1, $3); }
+      CBO inner_statement_list CBC                          { $$ = new NodesList\Stmts($2, $1, $3); }
     | T_IF parentheses_expr statement elseif_list else_single
           { $$ = Stmt\If_[$2, ['stmts' => new NodesList\Stmts(toArray($3)), 'elseifs' => new NodesList\ElseIfs($4), 'else' => $5]]; }
     | T_IF parentheses_expr ':' inner_statement_list new_elseif_list new_else_single T_ENDIF ';'
@@ -229,12 +229,12 @@ function_declaration_statement:
 ;
 
 class_declaration_statement:
-      class_entry_type T_STRING extends_from implements_list '{' class_statement_list '}'
-          { $$ = Stmt\Class_[$2, ['type' => $1, 'extends' => $3, 'implements' => $4, 'stmts' => $6]]; }
-    | T_INTERFACE T_STRING interface_extends_list '{' class_statement_list '}'
-          { $$ = Stmt\Interface_[$2, ['extends' => $3, 'stmts' => $5]]; }
-    | T_TRAIT T_STRING '{' class_statement_list '}'
-          { $$ = Stmt\Trait_[$2, $4]; }
+      class_entry_type T_STRING extends_from implements_list CBO class_statement_list CBC
+          { $$ = Stmt\Class_[$2, ['type' => $1, 'extends' => $3, 'implements' => $4, 'stmts' => new NodesList\Stmts($6, $5, $7)]]; }
+    | T_INTERFACE T_STRING interface_extends_list CBO class_statement_list CBC
+          { $$ = Stmt\Interface_[$2, ['extends' => $3, 'stmts' => new NodesList\Stmts($5, $4, $6)]]; }
+    | T_TRAIT T_STRING CBO class_statement_list CBC
+          { $$ = Stmt\Trait_[$2, NodesList\Stmts($4, $3, $5)]; }
 ;
 
 class_entry_type:
@@ -428,7 +428,7 @@ class_statement_list:
 class_statement:
       variable_modifiers property_declaration_list ';'      { $$ = Stmt\Property[$1, $2]; }
     | T_CONST class_const_list ';'                          { $$ = Stmt\ClassConst[$2]; }
-    | method_modifiers T_FUNCTION optional_ref identifier _RBO parameter_list _RBC optional_return_type method_body
+    | method_modifiers T_FUNCTION optional_ref identifier RBO parameter_list RBC optional_return_type method_body
           { $$ = Stmt\ClassMethod[$4, ['type' => $1, 'byRef' => $3, 'params' => new NodesList\Params($6, $5, $7), 'returnType' => $8, 'stmts' => $9]]; }
     | T_USE name_list trait_adaptations                     { $$ = Stmt\TraitUse[$2, $3]; }
 ;
@@ -466,7 +466,7 @@ trait_method_reference:
 
 method_body:
       ';' /* abstract method */                             { $$ = null; }
-    | _CBO inner_statement_list _CBC                          { $$ = new NodesList\Stmts($2, $1, $3); }
+    | CBO inner_statement_list CBC                          { $$ = new NodesList\Stmts($2, $1, $3); }
 ;
 
 variable_modifiers:
@@ -617,10 +617,10 @@ yield_expr:
 ;
 
 array_expr:
-      T_ARRAY _RBO array_pair_list _RBC
+      T_ARRAY RBO array_pair_list RBC
           { $attrs = attributes(); $attrs['kind'] = Expr\Array_::KIND_LONG;
             $$ = new Expr\Array_(new NodesList\ArrayItems($3, $2, $4), $attrs); }
-    | _TBO array_pair_list _TBC
+    | TBO array_pair_list TBC
           { $attrs = attributes(); $attrs['kind'] = Expr\Array_::KIND_SHORT;
             $$ = new Expr\Array_(new NodesList\ArrayItems($2, $1, $3), $attrs); }
 ;
@@ -973,26 +973,26 @@ encaps_var_offset:
     | T_NUM_STRING                                          { $$ = Scalar\String_[$1]; }
     | T_VARIABLE                                            { $$ = Expr\Variable[parseVar($1)]; }
 ;
-_RBO:
+RBO:
 	  opened_round_bracket                                  { $$ = Tag\ListOpen[$1]; }
 ;
-_RBC:
+RBC:
 	  closed_round_bracket                                  { $$ = Tag\ListClose[$1]; }
 ;
 
-_CBO:
+CBO:
 	  opened_curly_bracket                                  { $$ = Tag\ListOpen[$1]; }
 ;
 
-_CBC:
+CBC:
 	  closed_curly_bracket                                  { $$ = Tag\ListClose[$1]; }
 ;
 
-_TBO:
+TBO:
 	  opened_rect_bracket                                   { $$ = Tag\ListOpen[$1]; }
 ;
 
-_TBC:
+TBC:
 	  closed_rect_bracket                                   { $$ = Tag\ListClose[$1]; }
 ;
 

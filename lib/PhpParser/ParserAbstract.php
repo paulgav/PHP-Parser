@@ -428,11 +428,11 @@ abstract class ParserAbstract implements Parser
             return $stmts;
         } else {
             // For semicolon namespaces we have to move the statements after a namespace declaration into ->stmts
-            $resultStmts = array();
+            $resultStmts = new NodesList\Stmts();
             $targetStmts =& $resultStmts;
             foreach ($stmts as $stmt) {
                 if ($stmt instanceof Node\Stmt\Namespace_) {
-                    $stmt->stmts = array();
+                    $stmt->stmts = new NodesList\Stmts();
                     $targetStmts =& $stmt->stmts;
                     $resultStmts[] = $stmt;
                 } elseif ($stmt instanceof Node\Stmt\HaltCompiler) {
